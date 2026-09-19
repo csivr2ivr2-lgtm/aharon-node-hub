@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aharon Search</title>
+  <link rel="stylesheet" href="/search/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <section>
+        <div class="eyebrow">Aharon Search</div>
+        <h1>בדיקת התאמה וחיבורי זהות</h1>
+        <p>מזינים שם, מספר, משתמש או תמונה — המערכת בודקת מקורות ציבוריים, מצליבה נתונים ומחזירה ממצאים ברורים לפי רמת אמון.</p>
+      </section>
+      <button id="settingsBtn" class="icon-btn" title="ניהול מערכת">⚙</button>
+    </header>
+
+    <section id="authBox" class="card hidden">
+      <h2>כניסה לניהול</h2>
+      <p>המערכת מוגנת. הזן קוד גישה כדי להפעיל בדיקות ולנהל חיבורים.</p>
+      <input id="tokenInput" type="password" placeholder="קוד גישה">
+      <button id="saveToken">המשך</button>
+    </section>
+
+    <nav class="view-tabs" aria-label="מצבי חיפוש">
+      <button id="searchTabBtn" class="view-tab active" type="button" aria-selected="true">חיפוש והצלבה</button>
+      <button id="registryTabBtn" class="view-tab" type="button" aria-selected="false">חיפוש במאגר</button>
+    </nav>
+
+    <section id="searchView" class="view-panel">
+      <section id="selectedPersonCard" class="card selected-person-card hidden">
+        <div>
+          <span class="selected-person-kicker">אדם נבחר מהמאגר</span>
+          <h2 id="selectedPersonName">—</h2>
+          <div id="selectedPersonMeta" class="selected-person-meta"></div>
+        </div>
+        <button id="changePersonBtn" type="button" class="secondary">בחר אדם אחר</button>
+      </section>
+      <section class="grid">
+        <form id="searchForm" class="card form-card">
+          <h2>פרטים לבדיקה</h2>
+          <p class="helper">אין חובה למלא הכול. ככל שיש יותר פרטים רמת ההצלבה עולה.</p>
+          <label>שם פרטי<input name="first_name" autocomplete="off" placeholder="לדוגמה: אהרן"></label>
+          <label>שם משפחה<input name="last_name" autocomplete="off" placeholder="לדוגמה: פלוינסקי"></label>
+          <label>מספר טלפון<input name="phone" autocomplete="off" inputmode="tel" placeholder="0537291432"></label>
+          <label>שם משתמש ברשתות החברתיות<input name="username" autocomplete="off" placeholder="לדוגמה: aharon.cloud"></label>
+          <label>כינוי או שם עסק<input name="alias" autocomplete="off" placeholder="כינוי, מותג או שם עסק"></label>
+          <label>מידע נוסף להצלבה<input name="text" autocomplete="off" placeholder="תחום פעילות, מוסד, פרט מזהה נוסף וכדומה"></label>
+          <label>תמונה<input name="image_url" id="imageUrl" autocomplete="off" placeholder="קישור לתמונה ציבורית, או העלה/גרור תמונה למטה"></label>
+
+          <div id="imageDropZone" class="image-drop" tabindex="0" role="button" aria-label="העלאת תמונה מהמחשב">
+            <input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+            <strong>גרור תמונה לכאן</strong>
+            <span>או לחץ לבחירת JPG / PNG / WEBP עד 8MB</span>
+            <img id="imagePreview" class="image-preview hidden" alt="תצוגה מקדימה">
+            <div id="imageUploadStatus" class="helper"></div>
+          </div>
+
+          <details>
+            <summary>חיפוש מתקדם</summary>
+            <label>תעודת זהות<input name="id" autocomplete="off" inputmode="numeric"></label>
+            <label>תעודת זהות אב<input name="father_id" autocomplete="off" inputmode="numeric"></label>
+            <label>תעודת זהות אם<input name="mother_id" autocomplete="off" inputmode="numeric"></label>
+            <label>עיר<input name="city_name" autocomplete="off" placeholder="לדוגמה: אשדוד"></label>
+            <label>רחוב<input name="street" autocomplete="off"></label>
+            <label>ארץ לידה<input name="country_name" autocomplete="off" placeholder="לדוגמה: ישראל"></label>
+            <label>תאריך לידה<input name="birth_date" type="date" autocomplete="off"></label>
+            <label>שנת לידה<input name="birth_year" autocomplete="off" inputmode="numeric" maxlength="4" placeholder="לדוגמה: 2008"></label>
+          </details>
+          <button class="primary" type="submit">בדוק עכשיו</button>
+        </form>
+
+        <aside class="card status-card">
+          <h2>סיכום בדיקה</h2>
+          <div class="score" id="score">—</div>
+          <div id="summary">מוכן לבדיקה</div>
+          <div class="chips" id="chips"></div>
+        </aside>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>מקורות שנבדקו</h2><span id="verificationBadge"></span></div>
+        <div id="sourceStatus" class="chips"></div>
+        <p id="verificationText" class="helper"></p>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>ממצאים מרכזיים</h2><span id="linkedCount"></span></div>
+        <div class="table-wrap"><table><thead><tr><th>סוג</th><th>אמון</th><th>מצב</th><th>תיאור</th><th>קישור</th></tr></thead><tbody id="linksBody"></tbody></table></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>תוצאות הבדיקה</h2><span id="resultCount"></span></div>
+        <div id="results" class="results"></div>
+      </section>
+
+      <section id="reportSection" class="card report-card hidden">
+        <div class="section-head"><h2>דוח הצלבה</h2><span id="reportStatus"></span></div>
+        <div class="report-grid">
+          <section class="report-block report-wide ai-report-block"><h3>סיכום AI</h3><div id="aiReportText" class="ai-report-text"></div></section>
+          <section class="report-block"><h3>האדם שנבדק</h3><div id="reportTarget" class="report-content"></div></section>
+          <section class="report-block"><h3>אימות והצלבה</h3><div id="reportVerification" class="report-content"></div></section>
+          <section class="report-block report-wide"><h3>רשתות חברתיות וחשבונות</h3><div id="reportSocial" class="report-list"></div></section>
+          <section class="report-block report-wide"><h3>אזכורים וממצאים באינטרנט</h3><div id="reportWeb" class="report-list"></div></section>
+          <section class="report-block report-wide"><h3>סתירות / נקודות לבדיקה</h3><div id="reportConflicts" class="report-list"></div></section>
+        </div>
+      </section>
+    </section>
+
+    <section id="registryView" class="view-panel hidden">
+      <section class="card" id="registrySection">
+        <div class="section-head"><h2>חיפוש במאגר</h2><span id="registryStatus"></span></div>
+        <p class="helper">חיפוש ישיר במאגר. בשדות עיר וארץ לידה מזינים שם; המערכת ממירה אותם אוטומטית לקודים לפני החיפוש.</p>
+        <form id="registryForm" class="form-card registry-form-grid">
+          <label>תעודת זהות<input name="id" autocomplete="off" inputmode="numeric"></label>
+          <label>שם פרטי<input name="first_name" autocomplete="off"></label>
+          <label>שם משפחה<input name="last_name" autocomplete="off"></label>
+          <label>תעודת זהות אב<input name="father_id" autocomplete="off" inputmode="numeric"></label>
+          <label>תעודת זהות אם<input name="mother_id" autocomplete="off" inputmode="numeric"></label>
+          <label>עיר<input name="city_name" autocomplete="off" placeholder="לדוגמה: אשדוד"></label>
+          <label>רחוב<input name="street" autocomplete="off"></label>
+          <label>ארץ לידה<input name="country_name" autocomplete="off" placeholder="לדוגמה: ישראל"></label>
+          <label>תאריך לידה<input name="birth_date" type="date" autocomplete="off"></label>
+          <label>שנת לידה<input name="birth_year" autocomplete="off" inputmode="numeric" maxlength="4" placeholder="לדוגמה: 2008"></label>
+          <button class="primary" type="submit">חפש במאגר</button>
+        </form>
+        <div id="registryCityResolution" class="helper"></div>
+        <div id="registryCountryResolution" class="helper"></div>
+        <div id="registryResults" class="results"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog-card">
+      <button class="x" value="cancel">×</button>
+      <h2>ניהול מערכת</h2>
+      <p id="healthText">בודק מצב...</p>
+
+      <div id="waConnectedBox" class="success-box hidden">
+        WhatsApp מוגדר ומוכן לבדיקה. אזור החיבור מוסתר ללקוחות.
+      </div>
+
+      <section id="waSetupBox" class="setup-panel">
+        <h3>חיבור WhatsApp למנהל</h3>
+        <p class="helper">מיועד למפתח/מנהל בלבד. אחרי שהחשבון מחובר, אזור זה ייעלם מהממשק.</p>
+        <label>מספר WhatsApp לחיבור בקוד<input id="waPhone" autocomplete="off" inputmode="tel" placeholder="לדוגמה: 0537291432"></label>
+        <button id="connectCode" type="button">קבל קוד חיבור</button>
+        <button id="connectQr" type="button" class="secondary">הצג QR במקום קוד</button>
+        <div id="connectBox" class="qr"></div>
+      </section>
+
+      <button id="refreshWa" type="button" class="secondary">רענן מצב</button>
+      <button value="close">סגור</button>
+    </form>
+  </dialog>
+
+  <script src="/search/app.js" type="module"></script>
+  <script src="/search/workflow.js" type="module"></script>
+</body>
+</html>
