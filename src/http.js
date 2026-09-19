@@ -1,6 +1,7 @@
 import {timingSafeEqual} from "node:crypto";
 import {config} from "./config.js";
 export function equalToken(a,b){const aa=Buffer.from(String(a||"")),bb=Buffer.from(String(b||""));return aa.length>0&&aa.length===bb.length&&timingSafeEqual(aa,bb);}
+export const constantTimeTokenEqual=equalToken;
 export function bearerToken(req){return String(req.headers.authorization||"").match(/^Bearer\s+(.+)$/i)?.[1]?.trim()||"";}
 export async function jsonRequest(url,{method="GET",token="",body,headers={}}={}){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),config.httpTimeoutMs);
