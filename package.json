@@ -8,13 +8,20 @@
   },
   "scripts": {
     "start": "node src/server.js",
+    "start:unified": "node src/server-unified.js",
     "check": "node --check src/server.js && node --check src/mcp.js && node --check src/connectors/google.js && node --check src/connectors/security.js",
+    "check:search": "node --check src/server-unified.js && node --check apps/search/routes.js && node --check apps/search/webapp/src/engine.js && node --check apps/search/webapp/src/providers/osint/hub.js",
     "test": "node --test"
   },
   "dependencies": {
+    "@fastify/multipart": "^9.0.3",
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "@whiskeysockets/baileys": "^6.7.18",
     "fastify": "^5.0.0",
     "googleapis": "^181.0.0",
+    "libphonenumber-js": "^1.12.10",
+    "mysql2": "^3.14.4",
+    "pino": "^9.7.0",
     "ws": "^8.0.0",
     "zod": "^4.0.0"
   }
