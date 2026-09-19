@@ -1,0 +1,21 @@
+{
+  "name": "aharon-node-hub",
+  "version": "1.0.0",
+  "type": "module",
+  "private": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/mcp.js && node --check src/connectors/google.js && node --check src/connectors/security.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "fastify": "^5.0.0",
+    "googleapis": "^181.0.0",
+    "ws": "^8.0.0",
+    "zod": "^4.0.0"
+  }
+}
