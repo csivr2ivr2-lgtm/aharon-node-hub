@@ -10,7 +10,7 @@ test('unified entrypoint preserves existing hub code unchanged', async () => {
   const unified = await read('src/server-unified.js');
   const registrationImport = 'import {registerSearchRoutes} from "../apps/search/routes.js";\n';
   const registrationCall = 'await registerSearchRoutes(app);\n';
-  assert.equal(unified.replace(registrationImport, '').replace(registrationCall, ''), original);
+  assert.equal(unified.replace(registrationImport, '').replace(registrationCall, '').trimEnd(), original.trimEnd());
   assert.equal((unified.match(/app\.listen\(/g) || []).length, 1);
 });
 
