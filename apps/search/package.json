@@ -1,0 +1,17 @@
+{
+  "name": "@aharon-node-hub/search-module",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Isolated Aharon Search module mounted on existing Aharon Node Hub Fastify server",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^9.0.3",
+    "@whiskeysockets/baileys": "^6.7.18",
+    "libphonenumber-js": "^1.12.10",
+    "mysql2": "^3.14.4",
+    "pino": "^9.7.0"
+  }
+}
