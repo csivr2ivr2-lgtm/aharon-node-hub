@@ -1,33 +1,11 @@
-# Aharon Search בתוך aharon-node-hub
+# Aharon Search backend on the shared Node Hub
 
-**אין שינוי בקבצי ה־CRM, ב־`src/server.js`, ב־`package.json` המקורי או במסלולי ה־hub.** החיפוש הוא מודול מבודד תחת `apps/search`.
+The Hub is **not** a second Aharon Search website. The live UI and same-origin website API remain at https://search.aharon.cloud/. The CRM remains at https://crm.ivrphone.org/; its existing integration with the Hub (`WORKSPACE_BASE_URL` and `WORKSPACE_SERVICE_TOKEN`) is unchanged.
 
-## פריסה באפליקציית Node הקיימת בלבד
+The Hub's `app.cjs` loads `src/server-unified.js`, which registers only the authenticated, background-only API in `apps/search/backend/routes.js`. There are **no active `/search/` HTML, CSS, JavaScript or image-upload routes** on the Hub. Old copied UI files in `apps/search/webapp/public` are not served. The original `src/server.js` and all original CRM routes are unchanged.
 
-1. המשך להשתמש באותה אפליקציית Node, באותו PORT ובאותם משתני הסביבה הקיימים של ה־hub.
-2. התקן פעם אחת את תלויות החיפוש (ללא שינוי package.json המקורי):
-   ```bash
-   npm install --omit=dev
-   npm install --prefix apps/search --omit=dev
-   ```
-   בעדכון עתידי של אפליקציה, יש לוודא שהתלויות בתיקיית `apps/search` נשארות מותקנות.
-3. הגדר `SEARCH_ENABLED=1` ו־`SEARCH_ADMIN_TOKEN` עצמאי בעל 32 תווים ומעלה. ראה `apps/search/.env.example`. אל תשתמש בסיסמה או token של ה־CRM עבור החיפוש.
-4. שנה **רק את Startup File ב־Hostinger** מ־`src/server.js` ל־`src/server-unified.js`, והפעל מחדש את אותה אפליקציה. אין להפעיל את שתי נקודות הכניסה במקביל.
-5. פתח `https://YOUR-NODE-HUB-HOST/search/`. הממשק, API והקבצים הם מתחת `/search`, וה־WebSocket, ה־MCP והמסלולים `/v1` נותרים באותו שרת.
-6. בדוק עם token: `GET /search/api/health`. `GET /health` המקורי נשאר ללא שינוי.
+See [BACKEND_ONLY.md](BACKEND_ONLY.md) for the complete API contract. Add `SEARCH_WORKER_TOKEN` (32+ random characters) to the Hub's Hostinger environment alongside the existing `SEARCH_ENABLED=1`. Existing `SEARCH_ADMIN_TOKEN` is not used by the new private backend and must not be reused as a cross-site server credential.
 
-### CRM והדומיין crm.ivrphone.org
+Aharon Search site's original code is preserved. To make its existing UI use the new backend, deploy the separate, optional `server-hub.cjs` entrypoint supplied in the `Aharon-Search` repository and set `SEARCH_HUB_URL=https://s.ivrphone.org` and `SEARCH_HUB_TOKEN` to the **same secret** as the Hub's `SEARCH_WORKER_TOKEN` on the WEBSITE server only. See the site's `docs/SHARED_NODE_HUB.md`.
 
-על פי התיעוד הקיים של ה־hub, ה־CRM פועל ב־PHP וה־hub הוא אפליקציית Node נפרדת. הפריסה לעיל אינה משנה את ה־CRM ואינה מקימה אפליקציית Node נוספת. כדי לפתוח `crm.ivrphone.org/search/` **דווקא** תחת דומיין ה־CRM, צריך להגדיר בשרת/פרוקסי ניתוב נתיב `/search/*` ל־hub הקיים; עצם הוספת הקוד למאגר אינה משנה ניתוב DNS/Hostinger או פורסת את הקוד לאתר החי.
-
-### יכולות ומגבלות
-
-- אותו מנוע חיפוש, UI ודוח AI מהמאגר `Aharon-Search`, עם חיבור מבודד ועם token ייעודי.
-- GitHub ו־Reddit: ספקים ישירים ללא מפתח בתנאים הרלוונטיים. YouTube/X/Instagram: נדרש להגדיר credentials; ללא מפתח המקור מוצג כלא מוגדר.
-- WhatsApp ומאגר MySQL כבויים כברירת מחדל, ותיקיות session/נתוני מאגר אינן בקוד הציבורי. לפני הפעלת המאגר ודא הרשאות שימוש ואבטחת גישה.
-- TikTok worker ו־Social Analyzer/PhoneInfoga הם adapters מוכנים, **לא** התקנה או פריסה של תהליכי scraping נוספים. סביבת Node מנוהלת אינה מריצה אוטומטית workers ב־Python/Go.
-- זהו חיבור של קוד החיפוש שכבר קיים; הוא לא טוען שגירוד לא־רשמי מכל הרשתות כבר פועל בפועל.
-
-### חזרה לגרסה הקיימת
-
-כבה `SEARCH_ENABLED` או החזר את Startup File ל־`src/server.js`. קוד ה־CRM וה־hub המקורי לא הוחלף.
+The Hub provides a bounded in-memory work queue. A job can be lost across restarts; completed results are automatically expired after 15 minutes by default. No new Python/Go scraping workers are automatically installed. Optional providers require their own credentials and configuration.
