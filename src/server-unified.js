@@ -6,7 +6,7 @@ import {ConnectorsClient,googleConnector} from "./clients/connectors.js";
 import {RealtimeHub} from "./realtime.js";
 import {SyncScheduler} from "./scheduler.js";
 import {handleMcp} from "./mcp.js";
-import {registerSearchRoutes} from "../apps/search/routes.js";
+import {registerSearchBackendRoutes} from "../apps/search/backend/routes.js";
 assertConfig();
 const app=Fastify({logger:{level:config.env==="production"?"info":"debug",redact:["req.headers.authorization","*.token","*.secret","*.api_key","*.access_token","*.refresh_token"]},bodyLimit:2097152});
 const workspace=new WorkspaceClient(),connectors=new ConnectorsClient();
@@ -34,7 +34,7 @@ app.get("/oauth/google/callback",async(req,reply)=>{
 });
 app.post("/v1/sync",async(req,reply)=>{if(!admin(req,reply))return;return scheduler.runOnce();});
 app.all("/mcp",handleMcp);
-await registerSearchRoutes(app);
+await registerSearchBackendRoutes(app);
 await app.listen({host:config.host,port:config.port});scheduler.start();
 app.log.info({port:config.port},"Single-process Aharon Node Hub started");
 let closing=false;
