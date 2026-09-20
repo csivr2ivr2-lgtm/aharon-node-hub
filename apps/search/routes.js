@@ -121,7 +121,8 @@ export async function registerSearchRoutes(app) {
   cleanupTimer.unref?.();
   app.addHook('onClose', async () => {
     clearInterval(cleanupTimer);
-    await Promise.allSettled([whatsapp.shutdown(), registry.close()]);
+    // WhatsAppLinkedDeviceProvider opens and closes sockets within each operation; it has no shutdown() method.
+    await registry.close();
   });
 
   app.get('/search', async (_req, reply) => reply.code(302).header('location', '/search/').send());
