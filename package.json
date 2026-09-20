@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "private": false,
+  "main": "app.cjs",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "start": "node src/server.js",
-    "start:unified": "node src/server-unified.js",
+    "start": "node app.cjs",
+    "start:unified": "node app.cjs",
+    "start:legacy": "node src/server.js",
     "check": "node --check src/server.js && node --check src/mcp.js && node --check src/connectors/google.js && node --check src/connectors/security.js",
     "check:search": "node --check src/server-unified.js && node --check apps/search/routes.js && node --check apps/search/webapp/src/engine.js && node --check apps/search/webapp/src/providers/osint/hub.js",
     "test": "node --test"
